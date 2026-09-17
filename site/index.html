@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tag Firing QA Demo</title>
+</head>
+<body>
+  <h1>Tag Firing QA Demo Page</h1>
+  <p>
+    This page fires a few simulated tracking pixels used to exercise the
+    Playwright-based tag-firing QA suite. The requests point at fake
+    hostnames (not real Google/Meta endpoints) — the test suite intercepts
+    and fulfills them locally, so nothing here ever touches the real
+    internet.
+  </p>
+
+  <script>
+    // Simulated client identifier, as a real GA4 snippet would generate.
+    var CLIENT_ID = "555.123456789";
+
+    function fireGA4() {
+      // Simulated GA4 "collect" hit with the parameters GA4 requires:
+      //   tid = measurement/tracking ID
+      //   en  = event name
+      //   cid = client ID
+      var params = new URLSearchParams({
+        tid: "G-TESTID123",
+        en: "page_view",
+        cid: CLIENT_ID,
+        dl: window.location.href
+      });
+      new Image().src = "https://www.google-analytics.com/g/collect?" + params.toString();
+    }
+
+    function fireMetaPixel() {
+      // Simulated Meta Pixel "tr" hit with the parameters Meta requires:
+      //   id = pixel ID
+      //   ev = event name
+      var params = new URLSearchParams({
+        id: "1234567890123456",
+        ev: "PageView",
+        dl: window.location.href
+      });
+      new Image().src = "https://www.facebook.com/tr?" + params.toString();
+    }
+
+    function fireBrokenConversionTag() {
+      // Deliberately broken: a custom conversion tag that is missing its
+      // required "value" parameter, simulating a real-world misconfigured
+      // tag so the QA suite has a known failing case to catch.
+      var params = new URLSearchParams({
+        conv_id: "CONV-9999"
+        // "value" intentionally omitted
+      });
+      new Image().src = "https://tracking.example.com/collect?" + params.toString();
+    }
+
+    fireGA4();
+    fireMetaPixel();
+    fireBrokenConversionTag();
+  </script>
+</body>
+</html>
